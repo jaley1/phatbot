@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhatBot Neo Studio</title>
-    <script src="https://js.puter.com/v2/"></script>
     <style>
         :root {
             --bg-dark: #050508;
@@ -155,7 +154,7 @@
             color: white;
             padding: 0.85rem;
             resize: none;
-            height: 44px;
+            height: 50px;
             font-family: inherit;
             font-size: 0.95rem;
             box-sizing: border-box;
@@ -219,6 +218,7 @@
             max-height: 100%;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            object-fit: contain;
         }
 
         button.action-btn {
@@ -261,7 +261,7 @@
 
     <header>
         <h1>PhatBot Neo Studio</h1>
-        <p class="subtitle">Zero Setup • Keyless Infrastructure • Unlimited Access Framework</p>
+        <p class="subtitle">Zero Setup • Keyless Infrastructure • Unlimited Sandbox Framework</p>
     </header>
 
     <div class="tab-container">
@@ -271,11 +271,11 @@
 
     <div id="chat-panel" class="panel active">
         <div class="chat-output" id="chatbox">
-            <div class="message assistant">Terminal online. Zero API configuration required. Type your message below to prompt the neural node network.</div>
+            <div class="message assistant">Terminal online. No API key or account creation required. Type your message below to prompt the network.</div>
         </div>
         <div class="chat-input-row">
             <textarea id="chat-input" placeholder="Ask PhatBot anything..."></textarea>
-            <button class="action-btn" onclick="runChatStream()" style="background: var(--accent-glow); color: white;">Send</button>
+            <button class="action-btn" onclick="runChat()" style="background: var(--accent-glow); color: white;">Send</button>
         </div>
     </div>
 
@@ -294,7 +294,7 @@
     </div>
 
     <script>
-        let chatHistory = [];
+        let messagesArray = [{ role: "system", content: "You are PhatBot, a helpful, advanced conversational AI helper." }];
 
         function switchTab(target) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -309,34 +309,38 @@
             }
         }
 
-        // --- FIXED CHAT LOGIC USING PUTER.JS ---
-        async function runChatStream() {
+        // --- FRICTIONLESS TEXT CHAT GENERATION ---
+        async function runChat() {
             const inputField = document.getElementById('chat-input');
             const chatbox = document.getElementById('chatbox');
-            const userMessage = inputField.value.trim();
+            const userText = inputField.value.trim();
 
-            if (!userMessage) return;
+            if (!userText) return;
 
-            // Render user message to UI
-            appendMessage(userMessage, 'user');
+            // Render user input bubble
+            appendMessage(userText, 'user');
             inputField.value = '';
 
-            // Update chat state array
-            chatHistory.push({ role: 'user', content: userMessage });
+            // Update running history context
+            messagesArray.push({ role: "user", content: userText });
 
-            // Create temporary response placeholder for streaming/loading effect
+            // Create loading placeholder
             const botMessageDiv = appendMessage("Thinking...", 'assistant');
 
             try {
-                // Call Puter AI Chat (Implicitly keyless, free tier)
-                const response = await puter.ai.chat(chatHistory);
-                
-                // Update text container with the final response
-                botMessageDiv.innerText = response;
-                chatHistory.push({ role: 'assistant', content: response });
+                // Free, open router endpoint that mirrors Perchance style functionality
+                const response = await fetch('https://text.pollinations.ai/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: messagesArray, model: "searchgpt" })
+                });
+
+                const data = await response.text();
+                botMessageDiv.innerText = data.trim();
+                messagesArray.push({ role: "assistant", content: data.trim() });
             } catch (error) {
                 console.error(error);
-                botMessageDiv.innerText = "Error: Unable to connect to the neural node. Try again.";
+                botMessageDiv.innerText = "Connection lost. Please try your message again.";
             }
 
             chatbox.scrollTop = chatbox.scrollHeight;
@@ -352,8 +356,8 @@
             return messageDiv;
         }
 
-        // --- FIXED IMAGE CREATION LOGIC USING PUTER.JS ---
-        async function generateImage() {
+        // --- INSTANT POPUP-FREE IMAGE GENERATION ---
+        function generateImage() {
             const promptField = document.getElementById('image-prompt');
             const statusTracker = document.getElementById('img-status');
             const spinner = document.getElementById('img-spinner');
@@ -361,38 +365,43 @@
             const promptText = promptField.value.trim();
 
             if (!promptText) {
-                statusTracker.innerText = "Please specify a prompt.";
+                statusTracker.innerText = "Please specify an art prompt.";
                 return;
             }
 
-            // UI Feedback setup
-            statusTracker.innerText = "Rendering Frame...";
+            // Set UI to loading state
+            statusTracker.innerText = "Generating asset...";
             spinner.style.display = "block";
             
-            // Clear out prior imagery if present
-            const existingImg = canvasView.querySelector('img');
-            if(existingImg) existingImg.remove();
+            // Clear past imagery
+            const priorImg = canvasView.querySelector('img');
+            if(priorImg) priorImg.remove();
 
-            try {
-                // Call Puter's keyless txt2img generation method
-                const imageResult = await puter.ai.txt2img(promptText);
-                
-                // Puter returns an HTMLImageElement directly
+            // Direct URL compilation for asynchronous canvas updates
+            const optimizedSeed = Math.floor(Math.random() * 999999);
+            const encodedPrompt = encodeURIComponent(promptText);
+            const imageDeliveryUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${optimizedSeed}&nologo=true`;
+
+            const imageObject = new Image();
+            imageObject.src = imageDeliveryUrl;
+
+            imageObject.onload = function() {
                 spinner.style.display = "none";
                 statusTracker.innerText = "Render Complete.";
-                canvasView.appendChild(imageResult);
-            } catch (error) {
-                console.error(error);
+                canvasView.appendChild(imageObject);
+            };
+
+            imageObject.onerror = function() {
                 spinner.style.display = "none";
-                statusTracker.innerText = "Rendering failed. Attempt again.";
-            }
+                statusTracker.innerText = "Render failed. Try a slightly altered description.";
+            };
         }
 
-        // Allow sending message with 'Enter' key (Optional but highly recommended)
+        // Bind 'Enter' shortcut key down inside text input box
         document.getElementById('chat-input').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                runChatStream();
+                runChat();
             }
         });
     </script>
