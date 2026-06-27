@@ -302,7 +302,6 @@
     <script>
         let chatHistory = [];
 
-        // FIXED: Corrected reference selection arrays preventing active window panel swaps
         function switchTab(target) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -316,3 +315,5 @@
             }
         }
 
+        async function runChatStream() {
+            const key = document.getElementById('apikey').value.trim();
