@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhatBot AI Studio</title>
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --card-dark: rgba(18, 18, 24, 0.7);
+            --accent-glow: #3b82f6;
+            --accent-green: #10b981;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(to right, var(--accent-glow), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .config-bar {
+            width: 90%;
+            max-width: 1000px;
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            box-sizing: border-box;
+        }
+
+        .config-bar input {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 8px;
+            width: 90%;
+            max-width: 1000px;
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-glow);
+            color: white;
+            border-color: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .panel {
+            display: none;
+            width: 90%;
+            max-width: 1000px;
+            height: 550px;
+            background: var(--card-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-output {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 0.85rem 1.1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            align-self: flex-end;
+        }
+
+        .message.assistant {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+        }
+
+        .chat-input-row {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .chat-input-row textarea {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            padding: 0.75rem;
+            resize: none;
+            height: 40px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .image-layout {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        .image-sidebar {
+            width: 320px;
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: rgba(0,0,0,0.15);
+            box-sizing: border-box;
+        }
+
+        .image-sidebar textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            padding: 0.6rem;
+            box-sizing: border-box;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .image-canvas {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-canvas img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+
+        button.action-btn {
+            background: var(--text-main);
+            color: black;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .status-tracker {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .spinner {
+            display: none;
+            border: 3px solid rgba(255,255,255,0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-left-color: var(--accent-glow);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🤖 PHATBOT AI STUDIO</h1>
+        <p class="subtitle">Securely processing unmetered cloud models via client browser operations.</p>
+    </header>
+
+    <div class="config-bar">
+        <label for="apikey" style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">OPENROUTER KEY:</label>
+        <input type="password" id="apikey" placeholder="Paste your sk-or-v1-... key here. It remains secure in local memory.">
+    </div>
+
+    <div class="tab-container">
+        <button id="btn-chat" class="tab-btn active" onclick="switchTab('chat')">💬 Conversational AI</button>
+        <button id="btn-image" class="tab-btn" onclick="switchTab('image')">🎨 Digital Art Room</button>
+    </div>
+
+    <!-- PANEL 1: TEXT CHAT -->
+    <div id="chat-panel" class="panel active">
+        <div class="chat-output" id="chatbox">
+            <div class="message assistant">System loaded. Enter your API Key above and begin typing below.</div>
+        </div>
+        <div class="chat-input-row">
+            <textarea id="chat-input" placeholder="Ask PhatBot anything..."></textarea>
+            <button class="action-btn" onclick="runChatStream()" style="background: var(--accent-glow); color: white;">Send</button>
+        </div>
+    </div>
+
+    <!-- PANEL 2: IMAGE CORE -->
+    <div id="image-panel" class="panel">
+        <div class="image-layout">
+            <div class="image-sidebar">
+                <label style="font-weight: 600; font-size: 0.85rem;">ART DESCRIPTION PROMPT</label>
+                <textarea id="image-prompt" placeholder="Describe your image in rich detail..."></textarea>
+                <button class="action-btn" onclick="generateImage()" style="background: var(--accent-green); color: white; width:100%;">Render Image</button>
+                <div class="status-tracker" id="img-status">Canvas Idle</div>
+            </div>
+            <div class="image-canvas">
+                <div class="spinner" id="img-spinner"></div>
+                <img id="output-frame" style="display:none;" alt="Generated Asset Container">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chatHistory = [];
+
+        // FIXED: Corrected reference selection arrays preventing active window panel swaps
+        function switchTab(target) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            
+            if(target === 'chat') {
+                document.getElementById('btn-chat').classList.add('active');
+                document.getElementById('chat-panel').classList.add('active');
+            } else {
+                document.getElementById('btn-image').classList.add('active');
+                document.getElementById('image-panel').classList.add('active');
+            }
+        }
+
