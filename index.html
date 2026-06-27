@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhatBot Neo Studio</title>
     <!-- Injecting the Serverless Puter AI Cloud Framework -->
-    <script src="https://puter.com"></script>
+    <script src="https://js.puter.com/v2/"></script>
     <style>
         :root {
             --bg-dark: #050508;
@@ -215,15 +215,6 @@
             position: relative;
         }
 
-        .image-canvas img {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 12px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--border-color);
-            display: none;
-        }
-
         button.action-btn {
             background: var(--text-main);
             color: black;
@@ -292,9 +283,8 @@
                 <button class="action-btn" onclick="generateImage()" style="background: var(--accent-green); color: white; width: 100%;">Render Frame</button>
                 <div class="status-tracker" id="img-status">Canvas Engine Idle</div>
             </div>
-            <div class="image-canvas">
+            <div class="image-canvas" id="canvas-view">
                 <div class="spinner" id="img-spinner"></div>
-                <img id="output-frame" alt="Rendered Graphic Node">
             </div>
         </div>
     </div>
@@ -308,3 +298,11 @@
             
             if(target === 'chat') {
                 document.getElementById('btn-chat').classList.add('active');
+                document.getElementById('chat-panel').classList.add('active');
+            } else {
+                document.getElementById('btn-image').classList.add('active');
+                document.getElementById('image-panel').classList.add('active');
+            }
+        }
+
+        async function runChatStream() {
