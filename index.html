@@ -264,7 +264,8 @@
 
     <div class="config-bar">
         <label for="apikey" style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">OPENROUTER KEY:</label>
-        <input type="password" id="apikey" oninput="saveKey()" placeholder="Paste your sk-or-v1-... key here. Saved locally automatically.">
+        <input type="password" id="apikey" placeholder="Paste your sk-or-v1-... key here. Saved locally automatically.">
+        <button id="clear-key-btn" class="action-btn" style="background: rgba(255,0,0,0.2); color: #ff4d4d; display: none; padding: 0.5rem 1rem;" onclick="clearSavedKey()">Clear Key</button>
     </div>
 
     <div class="tab-container">
@@ -275,7 +276,7 @@
     <!-- PANEL 1: TEXT CHAT -->
     <div id="chat-panel" class="panel active">
         <div class="chat-output" id="chatbox">
-            <div class="message assistant">System loaded. Welcome back! Your saved API key has been securely attached. Type a message below to start chatting.</div>
+            <div class="message assistant" id="initial-welcome-msg">System loaded. Paste your API key in the configuration bar above to initialize the conversation stream terminal.</div>
         </div>
         <div class="chat-input-row">
             <textarea id="chat-input" placeholder="Ask PhatBot anything..."></textarea>
@@ -302,20 +303,12 @@
     <script>
         let chatHistory = [];
 
-        // Automatically load saved key on boot initialization
-        window.onload = function() {
+        // Safe script execution boot handler
+        document.addEventListener("DOMContentLoaded", function() {
             const savedKey = localStorage.getItem("phatbot_api_key");
-            if (savedKey) {
-                document.getElementById("apikey").value = savedKey;
-            }
-        }
+            const keyInput = document.getElementById("apikey");
+            const clearBtn = document.getElementById("clear-key-btn");
+            const welcomeMsg = document.getElementById("initial-welcome-msg");
 
-        function saveKey() {
-            const currentKey = document.getElementById("apikey").value.trim();
-            localStorage.setItem("phatbot_api_key", currentKey);
-        }
-
-        function switchTab(target) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            
+            if (savedKey && savedKey.trim() !== "") {
+                keyInput.value = savedKey;
