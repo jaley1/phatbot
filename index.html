@@ -264,7 +264,7 @@
 
     <div class="config-bar">
         <label for="apikey" style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted);">OPENROUTER KEY:</label>
-        <input type="password" id="apikey" placeholder="Paste your sk-or-v1-... key here. It remains secure in local memory.">
+        <input type="password" id="apikey" oninput="saveKey()" placeholder="Paste your sk-or-v1-... key here. Saved locally automatically.">
     </div>
 
     <div class="tab-container">
@@ -275,7 +275,7 @@
     <!-- PANEL 1: TEXT CHAT -->
     <div id="chat-panel" class="panel active">
         <div class="chat-output" id="chatbox">
-            <div class="message assistant">System loaded. Enter your API Key above and begin typing below.</div>
+            <div class="message assistant">System loaded. Welcome back! Your saved API key has been securely attached. Type a message below to start chatting.</div>
         </div>
         <div class="chat-input-row">
             <textarea id="chat-input" placeholder="Ask PhatBot anything..."></textarea>
@@ -302,18 +302,20 @@
     <script>
         let chatHistory = [];
 
+        // Automatically load saved key on boot initialization
+        window.onload = function() {
+            const savedKey = localStorage.getItem("phatbot_api_key");
+            if (savedKey) {
+                document.getElementById("apikey").value = savedKey;
+            }
+        }
+
+        function saveKey() {
+            const currentKey = document.getElementById("apikey").value.trim();
+            localStorage.setItem("phatbot_api_key", currentKey);
+        }
+
         function switchTab(target) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             
-            if(target === 'chat') {
-                document.getElementById('btn-chat').classList.add('active');
-                document.getElementById('chat-panel').classList.add('active');
-            } else {
-                document.getElementById('btn-image').classList.add('active');
-                document.getElementById('image-panel').classList.add('active');
-            }
-        }
-
-        async function runChatStream() {
-            const key = document.getElementById('apikey').value.trim();
