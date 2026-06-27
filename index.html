@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PhatBot Neo Studio</title>
-    <!-- Injecting the Serverless Puter AI Cloud Framework -->
     <script src="https://js.puter.com/v2/"></script>
     <style>
         :root {
@@ -215,6 +214,13 @@
             position: relative;
         }
 
+        .image-canvas img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
         button.action-btn {
             background: var(--text-main);
             color: black;
@@ -263,7 +269,6 @@
         <button id="btn-image" class="tab-btn" onclick="switchTab('image')">🎨 Digital Art Room</button>
     </div>
 
-    <!-- PANEL 1: TEXT CHAT -->
     <div id="chat-panel" class="panel active">
         <div class="chat-output" id="chatbox">
             <div class="message assistant">Terminal online. Zero API configuration required. Type your message below to prompt the neural node network.</div>
@@ -274,7 +279,6 @@
         </div>
     </div>
 
-    <!-- PANEL 2: IMAGE CORE -->
     <div id="image-panel" class="panel">
         <div class="image-layout">
             <div class="image-sidebar">
@@ -305,4 +309,92 @@
             }
         }
 
+        // --- FIXED CHAT LOGIC USING PUTER.JS ---
         async function runChatStream() {
+            const inputField = document.getElementById('chat-input');
+            const chatbox = document.getElementById('chatbox');
+            const userMessage = inputField.value.trim();
+
+            if (!userMessage) return;
+
+            // Render user message to UI
+            appendMessage(userMessage, 'user');
+            inputField.value = '';
+
+            // Update chat state array
+            chatHistory.push({ role: 'user', content: userMessage });
+
+            // Create temporary response placeholder for streaming/loading effect
+            const botMessageDiv = appendMessage("Thinking...", 'assistant');
+
+            try {
+                // Call Puter AI Chat (Implicitly keyless, free tier)
+                const response = await puter.ai.chat(chatHistory);
+                
+                // Update text container with the final response
+                botMessageDiv.innerText = response;
+                chatHistory.push({ role: 'assistant', content: response });
+            } catch (error) {
+                console.error(error);
+                botMessageDiv.innerText = "Error: Unable to connect to the neural node. Try again.";
+            }
+
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function appendMessage(text, sender) {
+            const chatbox = document.getElementById('chatbox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerText = text;
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            return messageDiv;
+        }
+
+        // --- FIXED IMAGE CREATION LOGIC USING PUTER.JS ---
+        async function generateImage() {
+            const promptField = document.getElementById('image-prompt');
+            const statusTracker = document.getElementById('img-status');
+            const spinner = document.getElementById('img-spinner');
+            const canvasView = document.getElementById('canvas-view');
+            const promptText = promptField.value.trim();
+
+            if (!promptText) {
+                statusTracker.innerText = "Please specify a prompt.";
+                return;
+            }
+
+            // UI Feedback setup
+            statusTracker.innerText = "Rendering Frame...";
+            spinner.style.display = "block";
+            
+            // Clear out prior imagery if present
+            const existingImg = canvasView.querySelector('img');
+            if(existingImg) existingImg.remove();
+
+            try {
+                // Call Puter's keyless txt2img generation method
+                const imageResult = await puter.ai.txt2img(promptText);
+                
+                // Puter returns an HTMLImageElement directly
+                spinner.style.display = "none";
+                statusTracker.innerText = "Render Complete.";
+                canvasView.appendChild(imageResult);
+            } catch (error) {
+                console.error(error);
+                spinner.style.display = "none";
+                statusTracker.innerText = "Rendering failed. Attempt again.";
+            }
+        }
+
+        // Allow sending message with 'Enter' key (Optional but highly recommended)
+        document.getElementById('chat-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                runChatStream();
+            }
+        });
+    </script>
+</body>
+</html>
